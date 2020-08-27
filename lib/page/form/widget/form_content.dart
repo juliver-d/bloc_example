@@ -17,14 +17,13 @@ class FormContent extends StatefulWidget {
 }
 
 class _FormContentState extends State<FormContent> {
-
-  ///选择类型
-  void _setType(int index) {
-    BlocProvider.of<FormBloc>(context).add(FormUpdateTypeEvent(selectIndex: index));
-  }
   ///选择区间
   void _setTime(String start, String end) {
     BlocProvider.of<FormBloc>(context).add(FormUpdateTimeEvent(start: start, end: end));
+  }
+  ///选择类型
+  void _setType(int index) {
+    BlocProvider.of<FormBloc>(context).add(FormUpdateTypeEvent(selectIndex: index));
   }
   ///确定提交
   void _confirmSave() {
@@ -35,8 +34,8 @@ class _FormContentState extends State<FormContent> {
   }
   ///时间选择器
   void _showPicker(Time time) {
-    JLPicker.showSectionPicker(context, time).then((newTime){
-      if(newTime != null) { _setTime(newTime.start, newTime.end); }
+    JLPicker.showSectionPicker(context, time).then((newTime) {
+      if (newTime != null) {_setTime(newTime.start, newTime.end); }
     });
   }
   ///退出
@@ -45,8 +44,8 @@ class _FormContentState extends State<FormContent> {
     if (state is FormLoadedState) {
       if (state.data.toSubmit() != state.initSubmit) {
         //数据有变化, 弹窗
-        JLDialog.cancelConfirmTextDialog(context, content: '内容已经变更，是否保存？').then((confirm){
-          confirm ?  _confirmSave() : Navigator.of(context).pop();
+        JLDialog.cancelConfirmTextDialog(context, content: '内容已经变更，是否保存？').then((confirm) {
+          confirm ? _confirmSave() : Navigator.of(context).pop();
         });
         return false;
       }
@@ -56,47 +55,47 @@ class _FormContentState extends State<FormContent> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FormBloc, FormDataState>(
-      builder: (context, state){
-        return WillPopScope(
-          onWillPop: () => _exitPage(context),
-          child: Scaffold(
-            appBar: AppBar(title: Text('设置'),),
-            body: Container(
-              color: Color(0xFFF6FAFF),
-              child: BlocBuilder<FormBloc, FormDataState>(
-                  builder: (context, state) {
-                    if (state is FormInProgressState) {
-                      return LoadingIndicator();
-                    }
-                    if (state is FormFailureState) {
-                      ToastUtil.show(state.error);
-                      return Container();
-                    }
-                    if (state is FormLoadedState) {
-                      var model = state.data;
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: <Widget>[
-                            _sectionHeader(),
-                            ContentItem(title: '选择区间', content: model.timeString, hasArrow: true, onTap: () => _showPicker(model.time),),
-                            _divider(),
-                            ContentItem(title: '选择地址', content: model.address, hasArrow: false,),
-                            _sectionHeader(),
-                            TypeItem(items: model.types ?? [], onIndexTap: (index) => _setType(index),),
-                            _divider(),
-                            ContentItem(title: '选择次数', content: model.counString, hasArrow: false,),
-                            _buildSaveButton(),
-                          ],
-                        ),
-                      );
-                    }
-                    return Container();
-                  }),
-            ),
+    return WillPopScope(
+      onWillPop: () => _exitPage(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('设置'),
+        ),
+        body: Container(
+          color: Color(0xFFF6FAFF),
+          child: BlocConsumer<FormBloc, FormDataState>(
+            listener: (context, state) {
+              if (state is FormFailureState) {
+                ToastUtil.show(state.error);
+              }
+            },
+            builder: (context, state) {
+              if (state is FormInProgressState) {
+                return LoadingIndicator();
+              }
+              if (state is FormLoadedState) {
+                var model = state.data;
+                return SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      _sectionHeader(),
+                      ContentItem(title: '选择区间', content: model.timeString, hasArrow: true, onTap: () => _showPicker(model.time),),
+                      _divider(),
+                      ContentItem(title: '选择地址', content: model.address, hasArrow: false,),
+                      _sectionHeader(),
+                      TypeItem(items: model.types ?? [], onIndexTap: (index) => _setType(index),),
+                      _divider(),
+                      ContentItem(title: '选择次数', content: model.counString, hasArrow: false,),
+                      _buildSaveButton(),
+                    ],
+                  ),
+                );
+              }
+              return Container();
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -109,7 +108,7 @@ class _FormContentState extends State<FormContent> {
   ///保存按钮
   Widget _buildSaveButton() {
     return BlocListener<SubmitBloc, NetworkState>(
-      listener: (ctx, state){
+      listener: (ctx, state) {
         if (state is NetworkSuccessState) {
           ToastUtil.show('保存成功!');
           Navigator.of(context).pop();
@@ -129,7 +128,8 @@ class _FormContentState extends State<FormContent> {
               borderRadius: BorderRadius.all(Radius.circular(4)),
             ),
             child: Center(
-              child: Text("确定",style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),),
+              child: Text("确定", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white,),
+              ),
             ),
           ),
         ),
@@ -137,5 +137,3 @@ class _FormContentState extends State<FormContent> {
     );
   }
 }
-
-
