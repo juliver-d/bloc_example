@@ -6,7 +6,7 @@ class HomePage extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('bloc demo'),),
+      appBar: AppBar(title: Text('bloc example'),),
       body: Container(
         child: Center(
           child: FlatButton(
